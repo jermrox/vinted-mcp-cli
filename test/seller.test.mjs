@@ -127,3 +127,12 @@ test('publish_listing refuses without explicit confirmation', async () => {
   await assert.rejects(callTool(mockClient(), 'publish_listing', { listingId: 'abcdefgh', confirm: true }), /No prepared listing/);
   await assert.rejects(callTool(mockClient(), 'publish_listing', { listingId: '../../etc/passwd', confirm: true }), /Invalid listing id/);
 });
+
+test('US listings use vinted.com and USD', async () => {
+  const { DOMAIN } = await import('../dist/client/types.js');
+  const { CURRENCY } = await import('../dist/seller/listing.js');
+  const { parseItemRef } = await import('../dist/ops/get-item.js');
+  assert.equal(DOMAIN.us, 'www.vinted.com');
+  assert.equal(CURRENCY.us, 'USD');
+  assert.deepEqual(parseItemRef({ url: 'https://www.vinted.com/items/123456-levis' }), { id: 123456, country: 'us' });
+});

@@ -195,7 +195,7 @@ program
   .command('compare <query>')
   .description('Compare prices across countries')
   .option('--countries <list>', 'comma-separated country codes (default: fr,de,it,es,nl,pl)', (v) => parseList<Country>(v))
-  .option('--all-countries', 'compare all 19 Vinted countries')
+  .option('--all-countries', 'compare all 20 Vinted countries')
   .option('-l, --limit <n>', 'items per country', (v) => Number(v), 20)
   .option('--brand-ids <ids>', 'comma-separated brand IDs', (v) => parseList<string>(v).map(Number))
   .option('--brand <names>', 'comma-separated brand names (resolved to IDs)')

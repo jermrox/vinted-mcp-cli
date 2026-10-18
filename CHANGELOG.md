@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added — United States
+- `us` country (www.vinted.com, USD) for search, items, sellers and the selling tools; `vinted.com` item URLs resolve to `us`.
+
 ### Added — selling on your own account
 - `price_research` MCP tool: samples up to 400 comparable listings and returns quartiles, three suggested asks and the most-favourited comparables.
 - Opt-in account tools (`VINTED_ACCOUNT_TOOLS=1`): `account_login`, `account_status`, `my_listings`, `prepare_listing`, `publish_listing`. They drive a persistent Chromium profile the seller signs into themselves. `prepare_listing` validates locally and `publish_listing` requires `confirm: true` (or `asDraft: true` to save to Vinted Drafts). Account tools refuse to run over non-loopback HTTP.
