@@ -110,5 +110,5 @@ export function buildItemPayload(s: ListingSpec, photoIds: number[], tempUuid: s
 export const CURRENCY: Record<Country, string> = {
   fr: 'EUR', de: 'EUR', it: 'EUR', es: 'EUR', nl: 'EUR', pt: 'EUR', be: 'EUR', at: 'EUR',
   lt: 'EUR', sk: 'EUR', hr: 'EUR', fi: 'EUR',
-  uk: 'GBP', pl: 'PLN', cz: 'CZK', hu: 'HUF', ro: 'RON', dk: 'DKK', se: 'SEK',
+  uk: 'GBP', us: 'USD', pl: 'PLN', cz: 'CZK', hu: 'HUF', ro: 'RON', dk: 'DKK', se: 'SEK',
 };

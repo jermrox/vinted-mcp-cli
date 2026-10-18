@@ -16,12 +16,12 @@ import { VERSION } from './version.js';
 const TOOLS = [
   {
     name: 'search_items',
-    description: 'Search Vinted second-hand listings with rich filters across 19 country sites. Returns a paginated list of items — each with title, price, currency, brand, size, condition, photo URL, item URL, favourite count, and seller info. Use get_categories to discover valid categoryId values and search_brands to resolve brand names to IDs. For comprehensive multi-page results use search_all_items instead.',
+    description: 'Search Vinted second-hand listings with rich filters across 20 country sites. Returns a paginated list of items — each with title, price, currency, brand, size, condition, photo URL, item URL, favourite count, and seller info. Use get_categories to discover valid categoryId values and search_brands to resolve brand names to IDs. For comprehensive multi-page results use search_all_items instead.',
     inputSchema: {
       type: 'object',
       properties: {
         query: { type: 'string', description: 'Search keywords, e.g. "Nike Air Max 90" or "levi 501 jeans"' },
-        country: { type: 'string', enum: COUNTRIES, default: 'fr', description: 'Vinted country site to search (fr, de, uk, it, es, nl, pl, pt, be, at, lt, cz, sk, hu, ro, hr, fi, dk, se)' },
+        country: { type: 'string', enum: COUNTRIES, default: 'fr', description: 'Vinted country site to search (fr, de, uk, it, es, nl, pl, pt, be, at, lt, cz, sk, hu, ro, hr, fi, dk, se, us)' },
         priceMin: { type: 'number', description: 'Minimum price in the local currency of the selected country' },
         priceMax: { type: 'number', description: 'Maximum price in the local currency of the selected country' },
         brandIds: { type: 'array', items: { type: 'integer' }, description: 'Numeric Vinted brand IDs from search_brands. Prefer the brand[] parameter for name-based lookup.' },

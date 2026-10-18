@@ -9,7 +9,7 @@ const DOMAIN_TO_CC: Record<string, Country> = {
   'fr': 'fr', 'de': 'de', 'co.uk': 'uk', 'it': 'it', 'es': 'es',
   'nl': 'nl', 'pl': 'pl', 'pt': 'pt', 'be': 'be', 'at': 'at',
   'lt': 'lt', 'cz': 'cz', 'sk': 'sk', 'hu': 'hu', 'ro': 'ro',
-  'hr': 'hr', 'fi': 'fi', 'dk': 'dk', 'se': 'se',
+  'hr': 'hr', 'fi': 'fi', 'dk': 'dk', 'se': 'se', 'com': 'us',
 };
 
 export function parseItemRef(input: { itemId?: number; url?: string; country?: Country }): { id: number; country: Country } {

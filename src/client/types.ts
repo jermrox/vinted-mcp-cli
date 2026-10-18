@@ -1,10 +1,10 @@
 export type Country =
   | 'fr' | 'de' | 'uk' | 'it' | 'es' | 'nl' | 'pl' | 'pt' | 'be' | 'at'
-  | 'lt' | 'cz' | 'sk' | 'hu' | 'ro' | 'hr' | 'fi' | 'dk' | 'se';
+  | 'lt' | 'cz' | 'sk' | 'hu' | 'ro' | 'hr' | 'fi' | 'dk' | 'se' | 'us';
 
 export const COUNTRIES: Country[] = [
   'fr', 'de', 'uk', 'it', 'es', 'nl', 'pl', 'pt', 'be', 'at',
-  'lt', 'cz', 'sk', 'hu', 'ro', 'hr', 'fi', 'dk', 'se',
+  'lt', 'cz', 'sk', 'hu', 'ro', 'hr', 'fi', 'dk', 'se', 'us',
 ];
 
 export const DOMAIN: Record<Country, string> = {
@@ -14,7 +14,7 @@ export const DOMAIN: Record<Country, string> = {
   at: 'www.vinted.at', lt: 'www.vinted.lt', cz: 'www.vinted.cz',
   sk: 'www.vinted.sk', hu: 'www.vinted.hu', ro: 'www.vinted.ro',
   hr: 'www.vinted.hr', fi: 'www.vinted.fi', dk: 'www.vinted.dk',
-  se: 'www.vinted.se',
+  se: 'www.vinted.se', us: 'www.vinted.com',
 };
 
 export type Condition =

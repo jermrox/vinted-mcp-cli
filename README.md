@@ -2,7 +2,7 @@
 
 # 🛍️ Vinted MCP & CLI Server
 
-**Give your AI assistant access to Vinted — search, compare prices, and track sellers across 19 countries.**
+**Give your AI assistant access to Vinted — search, compare prices, and track sellers across 20 countries.**
 
 [![npm version](https://img.shields.io/npm/v/@googlarz/vinted-client?style=flat-square&color=cc3534)](https://www.npmjs.com/package/@googlarz/vinted-client)
 [![CI](https://img.shields.io/github/actions/workflow/status/googlarz/vinted-mcp-cli/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/googlarz/vinted-mcp-cli/actions)
@@ -169,7 +169,7 @@ vinted size-groups --output table
 
 ## Supported Countries
 
-`fr` `de` `uk` `it` `es` `nl` `pl` `pt` `be` `at` `lt` `cz` `sk` `hu` `ro` `hr` `fi` `dk` `se`
+`fr` `de` `uk` `it` `es` `nl` `pl` `pt` `be` `at` `lt` `cz` `sk` `hu` `ro` `hr` `fi` `dk` `se` `us` (vinted.com)
 
 ---
 
@@ -237,7 +237,7 @@ Opt-in tools that act on **your own** Vinted account: sign in, price, prepare an
 git clone https://github.com/jermrox/vinted-mcp-cli && cd vinted-mcp-cli
 npm install && npm run build
 npx playwright install chromium
-claude mcp add vinted -e VINTED_ACCOUNT_TOOLS=1 -e VINTED_ACCOUNT_COUNTRY=uk -- node "$PWD/dist/mcp.js"
+claude mcp add vinted-seller -e VINTED_ACCOUNT_TOOLS=1 -e VINTED_ACCOUNT_COUNTRY=us -- node "$PWD/dist/mcp.js"
 ```
 
 Then: *"Log me in to Vinted"*, then *"List the jacket in ~/Vinted/inbox/north-face: The North Face Nuptse 700, men's M, black, worn one winter, small mark on the left cuff."*
