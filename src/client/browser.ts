@@ -14,7 +14,7 @@ const MISSING_DEPS_MSG =
   'Browser mode requires optional deps: npm i playwright playwright-extra puppeteer-extra-plugin-stealth\n' +
   'Then: npx playwright install chromium';
 
-async function loadStealthChromium() {
+export async function loadStealthChromium() {
   let chromium: any, addExtra: any, stealth: any;
   try {
     ({ chromium, addExtra } = await import('playwright-extra' as string));
@@ -98,7 +98,7 @@ async function launchAndFetch(itemId: number, country: Country, opts: BrowserOpt
   }
 }
 
-function toPlaywrightProxy(url: string) {
+export function toPlaywrightProxy(url: string) {
   const u = new URL(url);
   const out: { server: string; username?: string; password?: string } = {
     server: `${u.protocol}//${u.host}`,
