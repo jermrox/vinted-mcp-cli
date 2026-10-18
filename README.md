@@ -133,6 +133,7 @@ vinted size-groups --output table
 | `colors` | List all color options with IDs |
 | `size-groups` | List all size groups with IDs |
 | `sizes <labels...>` | Resolve size labels ("M", "42") to numeric IDs |
+| `price <query>` | Price an item you want to sell: comparables, quartiles, suggested asks |
 | `trending` | Newest / trending listings |
 | `debug` | Inspect session cookie names (`--show-cookie` to print values) |
 
@@ -245,6 +246,14 @@ Then: *"Log me in to Vinted"*, then *"List the jacket in ~/Vinted/inbox/north-fa
 How it works: the tools drive a real Chromium profile you logged into yourself, and call Vinted's own upload endpoints from inside that page. They use the same cookies, CSRF token and browser fingerprint as the website, and no password passes through the server. The window is visible by default, so you can watch every action (`VINTED_ACCOUNT_HEADLESS=1` hides it). Prepared listings and the browser profile live in `~/.vinted-mcp` (`VINTED_HOME`).
 
 > **Status:** the login, session and API plumbing were checked against live Vinted while logged out. The photo upload and listing endpoints follow the requests Vinted's web form sends, but have not yet run against a logged-in account. Publish your first item with `asDraft: true` and check it in the app. Vinted's terms restrict automated use, so keep volume at human pace: this is a listing assistant, not a bulk bot.
+
+### Phone mode: copy-ready listings
+
+No computer? In a Claude Code cloud session with this repo, drop item photos and a few notes in the chat. The `vinted-listing` skill (`.claude/skills/vinted-listing/`) confirms the item from the photos, prices it with `vinted price`, and returns the title, description, category, condition, parcel size and price as copy-ready fields. You paste them into the Vinted app and post.
+
+```bash
+vinted price "nike tech fleece hoodie" --country us --brand nike --size L --condition very_good
+```
 
 ### MCP over HTTP
 
