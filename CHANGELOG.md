@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added — phone mode
+- `vinted price <query>` CLI command (same as the `price_research` MCP tool).
+- `vinted-listing` Claude skill: photos and notes dropped in a chat become a copy-ready Vinted listing, priced from live comparables, for the seller to post from the app.
+
 ### Added — United States
 - `us` country (www.vinted.com, USD) for search, items, sellers and the selling tools; `vinted.com` item URLs resolve to `us`.
 

@@ -14,6 +14,7 @@ import { opGetSellerFeedback } from './ops/get-seller-feedback.js';
 import { opGetColors, resolveColorIds } from './ops/get-colors.js';
 import { opGetSizeGroups } from './ops/get-size-groups.js';
 import { resolveSizeIds } from './ops/sizes.js';
+import { callTool } from './dispatch.js';
 import { printOutput } from './format.js';
 import { VERSION } from './version.js';
 
@@ -354,6 +355,30 @@ program
         process.stderr.write(`warn: unresolved size(s): ${r.unresolved.join(', ')}\n`);
       }
       out(r, g.output);
+    } catch (e) { fail(e); }
+  });
+
+program
+  .command('price <query>')
+  .description('Price an item you want to sell: comparable listings, quartiles and suggested asks')
+  .addOption(new Option('-c, --country <cc>', 'country code').choices(COUNTRIES).default('fr'))
+  .option('--brand <names>', 'comma-separated brand names (resolved to IDs)')
+  .option('--size <labels>', 'comma-separated size labels (resolved to IDs)')
+  .option('--category-id <n>', 'category ID', (v) => Number(v))
+  .option('--condition <list>', 'comma-separated conditions', (v) => parseList<Condition>(v))
+  .option('--max-items <n>', 'comparables to sample, 10-400', (v) => Number(v), 150)
+  .action(async (query: string, o, cmd) => {
+    try {
+      const g = cmd.optsWithGlobals();
+      out(await callTool(client(g), 'price_research', {
+        query,
+        country: o.country,
+        brand: o.brand,
+        size: o.size,
+        categoryId: o.categoryId,
+        condition: o.condition,
+        maxItems: o.maxItems,
+      }), g.output);
     } catch (e) { fail(e); }
   });
 
