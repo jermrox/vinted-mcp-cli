@@ -10,7 +10,7 @@ import {
 import { VintedClient } from './client/session.js';
 import { COUNTRIES } from './client/types.js';
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { callTool } from './dispatch.js';
+import { callTool, accountToolsEnabled } from './dispatch.js';
 import { VERSION } from './version.js';
 
 const TOOLS = [
@@ -239,7 +239,103 @@ const TOOLS = [
       },
     },
   },
+  {
+    name: 'price_research',
+    description: 'Price an item you want to SELL: pulls up to 400 comparable live listings and returns min/p25/median/p75/max, three suggested asks (quickSale, fair, ambitious) and the 10 most-favourited comparables. Pass brand/size/condition to tighten the comparison.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'What the item is, e.g. "Nike Air Max 90 white" (model names beat generic words)' },
+        country: { type: 'string', enum: COUNTRIES, default: 'fr', description: 'The Vinted site you will sell on' },
+        brand: { type: 'array', items: { type: 'string' }, description: 'Brand name(s), resolved automatically' },
+        size: { type: 'array', items: { type: 'string' }, description: 'Size label(s), resolved automatically' },
+        categoryId: { type: 'integer', description: 'Category ID from get_categories' },
+        condition: { type: 'array', items: { type: 'string', enum: ['new_with_tags', 'new_without_tags', 'very_good', 'good', 'satisfactory'] } },
+        maxItems: { type: 'integer', default: 150, description: 'Comparables to sample, 10–400' },
+      },
+      required: ['query'],
+    },
+  },
 ];
+
+const CONDITIONS = ['new_with_tags', 'new_without_tags', 'very_good', 'good', 'satisfactory'];
+
+/** Listed only when the operator sets VINTED_ACCOUNT_TOOLS=1: they act on the seller's own account. */
+const ACCOUNT_TOOL_DEFS = [
+  {
+    name: 'account_login',
+    description: 'Open a visible Chromium window on Vinted so the seller can sign in themselves (password, Google, Apple — never typed by the assistant). Waits until login completes, then returns the profile and an account-readiness checklist. The login is kept in a local browser profile for later calls.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        country: { type: 'string', enum: COUNTRIES, description: 'Vinted site of the account (default: VINTED_ACCOUNT_COUNTRY or fr)' },
+        timeoutSec: { type: 'integer', default: 300, description: 'How long to wait for the seller to finish signing in, 30–900' },
+      },
+    },
+  },
+  {
+    name: 'account_status',
+    description: 'Check the logged-in Vinted account: username, listing count, reviews, photo/bio/verification state, holiday mode, and a readiness checklist of what to fix before selling.',
+    inputSchema: {
+      type: 'object',
+      properties: { country: { type: 'string', enum: COUNTRIES } },
+    },
+  },
+  {
+    name: 'my_listings',
+    description: 'The seller\'s live Vinted listings plus every listing prepared locally (prepared, vinted_draft, published, failed).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        country: { type: 'string', enum: COUNTRIES },
+        page: { type: 'integer', default: 1 },
+      },
+    },
+  },
+  {
+    name: 'prepare_listing',
+    description: 'Build and validate a listing locally WITHOUT touching Vinted. Takes the item spec plus photo file paths or a folder of photos (sorted by file name; the first is the cover). Resolves brand, size and colour names to Vinted IDs, checks Vinted\'s limits, and returns a preview, errors, warnings and a listingId. Call again with listingId to edit fields.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        listingId: { type: 'string', description: 'Edit an existing prepared listing instead of creating one' },
+        title: { type: 'string', description: '5–100 chars: brand + item + key detail + size, e.g. "Levi\'s 501 straight jeans W32 L32 dark wash"' },
+        description: { type: 'string', description: '5–2000 chars: condition and flaws, measurements, material, fit, why selling' },
+        price: { type: 'number', description: 'Asking price in the account\'s currency' },
+        condition: { type: 'string', enum: CONDITIONS },
+        categoryId: { type: 'integer', description: 'Leaf category ID from get_categories' },
+        brand: { type: 'string', description: 'Brand name, resolved to brandId' },
+        brandId: { type: 'integer' },
+        size: { type: 'string', description: 'Size label, resolved to sizeId when unambiguous' },
+        sizeId: { type: 'integer' },
+        color: { type: 'array', items: { type: 'string' }, description: 'Up to 2 colour names' },
+        colorIds: { type: 'array', items: { type: 'integer' } },
+        packageSize: { type: 'string', enum: ['small', 'medium', 'large'], description: 'small: fits a large envelope; medium: shoebox; large: moving box' },
+        isUnisex: { type: 'boolean' },
+        photos: { type: 'array', items: { type: 'string' }, description: 'Local photo paths (jpg, png, webp, heic), up to 20' },
+        folder: { type: 'string', description: 'A folder of photos to use, in file-name order' },
+        country: { type: 'string', enum: COUNTRIES },
+      },
+    },
+  },
+  {
+    name: 'publish_listing',
+    description: 'Upload a prepared listing\'s photos and create it on the seller\'s Vinted account. Requires confirm: true, which you may only set after the seller has seen the preview and said yes. asDraft: true saves it to Drafts in their Vinted app instead of going live.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        listingId: { type: 'string' },
+        confirm: { type: 'boolean', description: 'Must be true: the seller approved this exact preview' },
+        asDraft: { type: 'boolean', default: false, description: 'Save to Vinted Drafts instead of publishing' },
+      },
+      required: ['listingId', 'confirm'],
+    },
+  },
+];
+
+function listedTools() {
+  return accountToolsEnabled() ? [...TOOLS, ...ACCOUNT_TOOL_DEFS] : TOOLS;
+}
 
 const PROMPTS = [
   {
@@ -287,7 +383,7 @@ function makeServer(sharedClient?: VintedClient): Server {
   let client: VintedClient | null = sharedClient ?? null;
   const getClient = () => (client ??= new VintedClient());
 
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: listedTools() }));
 
   server.setRequestHandler(ListPromptsRequestSchema, async () => ({ prompts: PROMPTS }));
 
@@ -387,6 +483,9 @@ async function startHttp() {
   const token = process.env.VINTED_MCP_TOKEN || undefined;
   const loopback = LOOPBACK_HOSTS.has(host.replace(/^\[|\]$/g, ''));
 
+  if (!loopback && accountToolsEnabled()) {
+    throw new Error('Refusing to expose account tools beyond loopback. Unset VINTED_ACCOUNT_TOOLS or bind to 127.0.0.1.');
+  }
   if (!loopback && !token) {
     throw new Error(
       `Refusing to listen on ${host} without authentication. Set VINTED_MCP_TOKEN, or bind to 127.0.0.1.`,

@@ -217,8 +217,34 @@ claude mcp add vinted -- npx -y -p @googlarz/vinted-client vinted-mcp
 | `get_size_groups` | All size groups with IDs (Women's, Men's, Shoes, Kids…) |
 | `resolve_size_ids` | Resolve size labels ("M", "42", "XL") to numeric filter IDs |
 | `resolve_color_ids` | Resolve color names ("black", "navy blue") to numeric filter IDs |
+| `price_research` | Price an item you want to sell: comparable listings, quartiles and three suggested asks |
 
 Brand, size and color names passed to `search_items`, `search_all_items`, `get_new_items` and `compare_prices` are resolved automatically. If none of the names resolve the call fails (rather than silently searching unfiltered); if only some do, the result includes a `warnings` array. Browser mode for `get_item` is not available to MCP callers — the server operator enables it with `VINTED_BROWSER=1`.
+
+### Selling: list items on your own account
+
+Opt-in tools that act on **your own** Vinted account: sign in, price, prepare and publish listings. They are hidden unless the server is started with `VINTED_ACCOUNT_TOOLS=1`, and run only over stdio or loopback HTTP.
+
+| Tool | What it does | Touches Vinted? |
+|---|---|---|
+| `account_login` | Opens a visible Chromium window; **you** sign in (password, Google or Apple). The session is kept in a local browser profile. Returns your profile and a readiness checklist. | Read |
+| `account_status` | Profile, listing count, reviews, photo/bio/verification/holiday state, and what to fix before selling | Read |
+| `my_listings` | Your live listings plus every listing prepared locally | Read |
+| `prepare_listing` | Builds and validates a listing from a spec and a photo folder or paths. Resolves brand/size/colour names to IDs and returns a preview. Nothing is sent to Vinted. | No |
+| `publish_listing` | Uploads the photos and creates the listing. Refuses unless `confirm: true`; `asDraft: true` saves it to Drafts in your Vinted app instead. | **Write** |
+
+```bash
+git clone https://github.com/jermrox/vinted-mcp-cli && cd vinted-mcp-cli
+npm install && npm run build
+npx playwright install chromium
+claude mcp add vinted -e VINTED_ACCOUNT_TOOLS=1 -e VINTED_ACCOUNT_COUNTRY=uk -- node "$PWD/dist/mcp.js"
+```
+
+Then: *"Log me in to Vinted"*, then *"List the jacket in ~/Vinted/inbox/north-face: The North Face Nuptse 700, men's M, black, worn one winter, small mark on the left cuff."*
+
+How it works: the tools drive a real Chromium profile you logged into yourself, and call Vinted's own upload endpoints from inside that page. They use the same cookies, CSRF token and browser fingerprint as the website, and no password passes through the server. The window is visible by default, so you can watch every action (`VINTED_ACCOUNT_HEADLESS=1` hides it). Prepared listings and the browser profile live in `~/.vinted-mcp` (`VINTED_HOME`).
+
+> **Status:** the login, session and API plumbing were checked against live Vinted while logged out. The photo upload and listing endpoints follow the requests Vinted's web form sends, but have not yet run against a logged-in account. Publish your first item with `asDraft: true` and check it in the app. Vinted's terms restrict automated use, so keep volume at human pace: this is a listing assistant, not a bulk bot.
 
 ### MCP over HTTP
 
@@ -345,6 +371,12 @@ Standard `HTTPS_PROXY` / `HTTP_PROXY` env vars are also respected.
 | `VINTED_MCP_TRANSPORT` | `http` to serve MCP over HTTP instead of stdio |
 | `VINTED_MCP_TOKEN` | Bearer token required by the HTTP transport (mandatory for non-loopback hosts) |
 | `VINTED_MCP_HOST` / `VINTED_MCP_PORT` / `VINTED_MCP_PATH` | HTTP bind address (default `127.0.0.1`), port (`3001`) and path (`/mcp`) |
+| `VINTED_ACCOUNT_TOOLS` | `1` enables the selling tools (`account_login`, `account_status`, `my_listings`, `prepare_listing`, `publish_listing`) |
+| `VINTED_ACCOUNT_COUNTRY` | Country site of your account (default `fr`) |
+| `VINTED_ACCOUNT_HEADLESS` | `1` hides the browser window during account calls (login is always visible) |
+| `VINTED_HOME` | Where prepared listings and the browser profile are kept (default `~/.vinted-mcp`) |
+| `VINTED_PROFILE_DIR` | Override the browser profile directory |
+| `VINTED_CHROMIUM_PATH` | Use a specific Chromium binary instead of Playwright's |
 
 ---
 

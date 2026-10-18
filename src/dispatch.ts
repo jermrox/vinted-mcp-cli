@@ -13,6 +13,19 @@ import { opGetColors, resolveColorIds } from './ops/get-colors.js';
 import { opGetSizeGroups } from './ops/get-size-groups.js';
 import { resolveSizeIds } from './ops/sizes.js';
 import { opGetNewItems } from './ops/get-new-items.js';
+import { opPriceResearch } from './seller/pricing.js';
+import {
+  opAccountLogin, opAccountStatus, opMyListings, opPrepareListing, opPublishListing,
+} from './seller/ops.js';
+
+/** Tools that act on the seller's own Vinted account; the operator opts in with VINTED_ACCOUNT_TOOLS=1. */
+export const ACCOUNT_TOOLS = new Set([
+  'account_login', 'account_status', 'my_listings', 'prepare_listing', 'publish_listing',
+]);
+
+export function accountToolsEnabled(): boolean {
+  return process.env.VINTED_ACCOUNT_TOOLS === '1';
+}
 
 type Args = Record<string, any>;
 
@@ -69,6 +82,10 @@ export async function callTool(c: VintedClient, name: string, rawArgs: unknown):
   const country: Country = a.country ?? 'fr';
   if (a.afterId !== undefined && !Number.isSafeInteger(a.afterId)) throw new Error('afterId must be an integer');
 
+  if (ACCOUNT_TOOLS.has(name) && !accountToolsEnabled()) {
+    throw new Error(`${name} acts on your Vinted account and is disabled. Start the server with VINTED_ACCOUNT_TOOLS=1 to enable it.`);
+  }
+
   switch (name) {
     case 'search_items': {
       const warnings = await resolveFilters(c, a, country);
@@ -98,6 +115,15 @@ export async function callTool(c: VintedClient, name: string, rawArgs: unknown):
     case 'get_size_groups': return opGetSizeGroups(c, a as any);
     case 'resolve_color_ids': return resolveColorIds(c, list(a.colors), country);
     case 'resolve_size_ids': return resolveSizeIds(c, list(a.sizes), country);
+    case 'price_research': {
+      const warnings = await resolveFilters(c, a, country);
+      return withWarnings(await opPriceResearch(c, a as any), warnings);
+    }
+    case 'account_login': return opAccountLogin(a);
+    case 'account_status': return opAccountStatus(a);
+    case 'my_listings': return opMyListings(c, a);
+    case 'prepare_listing': return opPrepareListing(c, a);
+    case 'publish_listing': return opPublishListing(a as any);
     default: throw new Error(`Unknown tool: ${name}`);
   }
 }

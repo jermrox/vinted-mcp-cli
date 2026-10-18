@@ -26,3 +26,8 @@ export { opGetSizeGroups } from './ops/get-size-groups.js';
 export { resolveSizeIds } from './ops/sizes.js';
 export type { ResolveSizeIdsResult } from './ops/sizes.js';
 export { callTool } from './dispatch.js';
+export { opPriceResearch, priceStats, suggestPrice } from './seller/pricing.js';
+export type { PriceStats, PriceSuggestion, PriceResearchResult } from './seller/pricing.js';
+export { validateListing, buildItemPayload } from './seller/listing.js';
+export type { ListingSpec, PackageSize, ValidationResult } from './seller/listing.js';
+export { opAccountLogin, opAccountStatus, opMyListings, opPrepareListing, opPublishListing } from './seller/ops.js';
